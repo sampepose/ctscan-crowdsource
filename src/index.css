@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+img {
+  user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.top-buffer {
+  margin-top: 20px;
+}
+
+div#windowContainer {
+  display: inline-block;
+  height: 100vh;
+}
+
+.react-draggable div {
+  background-color: red;
+  opacity: 0.7;
+}
+
+.sampleImage {
+  width: 200px;
+}
+
+.mainImage {
+  width: 600px;
+}
