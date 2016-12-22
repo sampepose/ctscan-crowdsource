@@ -1,13 +1,20 @@
 var express = require('express');
-var session = require('express-session')
+var session = require('express-session');
+
 var app = express();
+
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: true,
   cookie: { secure: true }
 }));
-app.use(express.static('../src'));
+
+// We only need to serve static resources in production. Webpack handles it in dev.
+if (process.argv[2] === 'prod') {
+  app.use(express.static('build'));
+}
+
 app.post('/api/login', function(req, res) {
   if (!req.body.username || !req.body.password) {
     res.status(404).send('Invalid payload');
@@ -28,5 +35,5 @@ app.post('/api/label/', function(req, res) {
 });
 
 app.listen(8001, function () {
-  console.log('Example app listening on port 3000!');
+  console.log('Example app listening on port 8001!');
 });
