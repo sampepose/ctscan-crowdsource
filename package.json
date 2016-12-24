@@ -6,13 +6,15 @@
     "react-scripts": "0.4.3"
   },
   "dependencies": {
+    "bcrypt": "^1.0.1",
+    "body-parser": "^1.15.2",
     "bootstrap": "^3.3.7",
+    "express": "~4.14.0",
+    "express-session": "~1.14.1",
     "react": "^15.3.2",
     "react-bootstrap": "^0.30.3",
     "react-dom": "^15.3.2",
     "react-image-crop": "^1.0.3",
-    "express": "~4.14.0",
-    "express-session": "~1.14.1"
   },
   "scripts": {
     "start": "react-scripts start",
