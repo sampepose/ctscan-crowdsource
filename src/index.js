@@ -1,12 +1,43 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {IndexRoute, Router, Route, Link, browserHistory} from 'react-router'
+
+// Views
 import App from './App';
+import Dash from './Dash';
+import Login from './Login';
+import Signup from './Signup';
+
+// dat CSS
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/css/bootstrap-theme.css';
 import 'react-image-crop/dist/ReactCrop.css';
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-);
+function requireAuth(nextState, replace) {
+  if (nextState && nextState.location && nextState.location.pathname !== '/dash') {
+    return;
+  }
+  if (!localStorage.getItem('loggedIn') ) {
+    replace({
+      pathname: '/',
+      state: { nextPathname: nextState.location.pathname },
+    });
+  } else {
+    replace({
+      pathname: '/dash',
+      state: { nextPathname: nextState.location.pathname },
+    });
+  }
+}
+
+ReactDOM.render((
+  <Router history={browserHistory}>
+    <Route path="/" onEnter={requireAuth} >
+      <IndexRoute component={App}/>
+      <Route path="login" component={Login}/>
+      <Route path="signup" component={Signup}/>
+      <Route path="dash" component={Dash}/>
+    </Route>
+  </Router>
+), document.getElementById('root'))
