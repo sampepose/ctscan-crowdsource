@@ -53,16 +53,20 @@ const LabelSchema = new Schema({
     ref: 'Images',
     required: true,
   },
-  bounding_box: {
-    // Stored as stringified JSON {x, y, width, height} where (x,y) is top-left coords.
+  features: {
+    type: [{
+      type: String,
+      enum: [
+        'ARM', 'LEG', 'VERTEBRAE', 'MANDIBLE', 'BRAIN', 'CRANIUM',
+        'PHARYNX', 'HEART', 'LUNGS', 'STOMACH', 'SPLEEN', 'KIDNEYS', 'LIVER', 'PELVIS',
+      ],
+    }],
+    required: true,
+  },
+  plane: {
     type: String,
     required: true,
-    validate: {
-      validator: bb => {
-        const box = JSON.parse(bb);
-        return box.x != null && box.y  != null && box.width  != null && box.height != null;
-      },
-    },
+    enum: ['SAGITTAL', 'AXIAL', 'CORONAL'],
   },
   user: {
     type: ObjectId,
