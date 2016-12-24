@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {IndexRoute, Router, Route, Link, browserHistory} from 'react-router'
+import {IndexRoute, Router, Route, browserHistory} from 'react-router'
 
 // Views
 import App from './App';

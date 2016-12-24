@@ -1,5 +1,3 @@
-'use strict';
-
 import {browserHistory} from 'react-router'
 import React, {Component} from 'react';
 import 'es6-promise';
@@ -81,11 +79,6 @@ export default class Signup extends Component {
   }
 
   render() {
-    let errorMessage = null;
-    if (this.state.errorMessage) {
-      errorMessage = <p>{this.state.errorMessage}</p>
-    }
-
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
