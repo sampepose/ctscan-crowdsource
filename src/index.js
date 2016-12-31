@@ -18,16 +18,18 @@ function requireAuth(nextState, replace) {
   if (nextState && nextState.location && nextState.location.pathname !== '/dash') {
     return;
   }
-  if (!localStorage.getItem('loggedIn') ) {
+  if (!localStorage.getItem('loggedIn')) {
     replace({
       pathname: '/',
       state: { nextPathname: nextState.location.pathname },
     });
   } else {
-    replace({
-      pathname: '/dash',
-      state: { nextPathname: nextState.location.pathname },
-    });
+    if (nextState && nextState.location && nextState.location.pathname !== '/dash') {
+      replace({
+        pathname: '/dash',
+        state: { nextPathname: nextState.location.pathname },
+      });
+    }
   }
 }
 
