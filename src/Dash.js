@@ -51,10 +51,7 @@ class App extends Component {
       <Grid>
         <Row>
           <Col xs={6}>
-            <strong>Instructions:</strong>
-            <p>Select the correct area of the body for the shown scan. The larger the box, the larger the uncertainty.
-              <br />Click submit or press enter or space to send your selection.</p>
-            <img src={sample} className="mainImage center-block"/>
+            <img src={sample} id="mainImg" className="center-block"/>
           </Col>
           <Col xs={6}>
             <PlaneSelection onPlaneChange={this.changePlane}/>
@@ -69,7 +66,13 @@ class App extends Component {
                 onFeatureChange={this.changeFeatures} />
             }
             {
-              showSubmit && <Button bsSize='large' onClick={() => {console.log(this.state)}}>Submit</Button>
+              showSubmit &&
+              <Button
+                id="submitBtn"
+                className="center-block"
+                bsSize="large"
+                bsStyle="success"
+                onClick={() => {console.log(this.state)}}>Submit</Button>
             }
           </Col>
         </Row>
@@ -82,7 +85,7 @@ class PlaneSelection extends Component {
   render() {
     return ( // TODO: add ? hoverover thingy
       <div>
-        <h4>Plane:</h4>
+        <h4>Plane</h4>
         <Buttons
           buttons={PLANES}
           toggle={true}
@@ -96,7 +99,7 @@ class RegionSelection extends Component {
   render() {
     return ( // TODO: add ? hoverover thingy
       <div>
-        <h4>Region:</h4>
+        <h4>Region</h4>
         <Buttons
           active={this.props.active}
           buttons={REGIONS}
@@ -111,7 +114,7 @@ class FeatureSelection extends Component {
   render() {
     return (
       <div>
-        <h4>Features:</h4>
+        <h4>Features</h4>
         <Buttons
           active={this.props.active}
           buttons={this.props.features}
