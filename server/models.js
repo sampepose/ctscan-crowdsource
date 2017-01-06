@@ -43,9 +43,13 @@ const ImageSchema = new Schema({
   uri: {
     type: String,
     required: true,
-    unique: true,
+  },
+  modify_date: {
+    type: String,
+    required: true,
   },
 });
+ImageSchema.index({uri: 1, modify_date: 1}, {unique: true});
 
 const LabelSchema = new Schema({
   image: {
