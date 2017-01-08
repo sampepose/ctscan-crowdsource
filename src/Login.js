@@ -26,6 +26,7 @@ export default class Login extends Component {
     e.preventDefault();
     fetch('/api/login', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json'
       },

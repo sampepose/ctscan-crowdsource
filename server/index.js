@@ -4,22 +4,21 @@ var bodyParser = require('body-parser')
 var _ = require('underscore')
 var {Users, Images, Labels} = require('./models');
 const mongoose = require('mongoose');
+const path = require('path');
 
 const {ObjectId} = mongoose.Types;
 
 var app = express();
 app.use(bodyParser.json({}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 30,
+  },
 }));
-
-// We only need to serve static resources in production. Webpack handles it in dev.
-if (process.argv[2] === 'prod') {
-  app.use(express.static('build'));
-}
 
 // new static middleware
 var staticImageHandler = express.static(__dirname + '/../images')
@@ -58,6 +57,8 @@ app.post('/api/login', function(req, res) {
           } else if (!isMatch) {
             res.status(401).send({ error: 'Error authorizing user' });
           } else {
+            console.log('setting session');
+
             req.session.user_id = user._id;
 
             res.status(201).send();
@@ -93,7 +94,7 @@ app.post('/api/signup', function(req, res) {
 // Returns the next image to be labeled by the currently logged in session
 app.get('/api/image/next', function(req, res) {
   if (!req.session.user_id) {
-    res.status(404).send('Not logged in');
+    return res.status(401).send('Not logged in');
   }
 
   Images.aggregate([
@@ -194,6 +195,14 @@ app.post('/api/label/', function(req, res) {
     res.status(404).send('Not logged in');
   }
 });
+
+// We only need to serve static resources in production. Webpack handles it in dev.
+if (process.argv[2] === 'prod') {
+  app.use(express.static('build'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + '/../build/index.html'));
+  });
+}
 
 app.listen(8001, function () {
   console.log('Example app listening on port 8001!');

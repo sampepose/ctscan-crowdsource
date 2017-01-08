@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {Button, Col, Grid, Row} from 'react-bootstrap';
-import sample from './img/sample.jpg';
 
 import './Dash.css';
 
@@ -19,6 +18,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      imageURI: null,
       plane: null,
       region: null,
       features: [],
@@ -26,6 +26,29 @@ class App extends Component {
     this.changePlane = this.changePlane.bind(this);
     this.changeRegion = this.changeRegion.bind(this);
     this.changeFeatures = this.changeFeatures.bind(this);
+  }
+
+  componentDidMount() {
+    fetch('/api/image/next', {
+      credentials: 'include',
+      method: 'GET',
+    })
+    .then(data => {
+      console.log(data)
+      if (data.status === 200) {
+        return data.json();
+      } else {
+        // TODO: Handle 404 error
+      }
+    })
+    .then(data => {
+      this.setState({
+        imageURI: `images/${data.uri}`,
+      });
+    })
+    .catch(err => {
+      console.error(err);
+    });
   }
 
   changePlane(plane) {
@@ -51,7 +74,7 @@ class App extends Component {
       <Grid>
         <Row>
           <Col xs={6}>
-            <img src={sample} id="mainImg" className="center-block"/>
+            <img src={this.state.imageURI} id="mainImg" className="center-block"/>
           </Col>
           <Col xs={6}>
             <PlaneSelection onPlaneChange={this.changePlane}/>
