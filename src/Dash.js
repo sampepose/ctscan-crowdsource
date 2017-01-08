@@ -5,7 +5,8 @@ import {browserHistory} from 'react-router'
 import './Dash.css';
 
 // First decision
-const PLANES = ['Axial', 'Coronal', 'Sagittal'];
+const GARBAGE = 'Garbage';
+const PLANES = ['Axial', 'Coronal', 'Sagittal', GARBAGE];
 
 // Second decision
 const ARM = 'Arm', LEG = 'Leg', ABOVE_CLAVICLE = 'Above the clavicle', BELOW_CLAVICLE = 'Below the clavicle';
@@ -102,6 +103,13 @@ class App extends Component {
   }
 
   submit() {
+    let features = [];
+    if (this.state.region !== ARM && this.state.region !== LEG) {
+      features = this.state.features;
+    } else {
+      features = [this.state.region];
+    }
+
     fetch('/api/label', {
       credentials: 'include',
       method: 'POST',
@@ -110,7 +118,7 @@ class App extends Component {
       },
       body: JSON.stringify({
         image_id: this.state.imageID,
-        features: (this.state.region !== ARM && this.state.region !== LEG) ? this.state.features : [this.state.region],
+        features,
         plane: this.state.plane,
       }),
     })
@@ -157,7 +165,8 @@ class App extends Component {
   }
 
   render() {
-    const showSubmit = this.state.region && ((this.state.region === ARM || this.state.region === LEG) || this.state.features.length > 0);
+    const showSubmit = this.state.plane === GARBAGE ||
+      (this.state.region && ((this.state.region === ARM || this.state.region === LEG) || this.state.features.length > 0));
 
     return (
       <Grid>
@@ -189,7 +198,7 @@ class App extends Component {
               <PlaneSelection onPlaneChange={this.changePlane} active={[this.state.plane]}/>
             }
             {
-              this.state.plane &&
+              this.state.plane && this.state.plane !== GARBAGE &&
               <RegionSelection onRegionChange={this.changeRegion} active={[this.state.region]}/>
             }
             {
@@ -220,7 +229,7 @@ class App extends Component {
 class PlaneSelection extends Component {
   render() {
     const tooltip = (
-      <Tooltip id="tooltip">At what plane was this scan taken?</Tooltip>
+      <Tooltip id="tooltip">At what plane was this scan taken? Select 'Garbage' if poor scan or nothing of interest visible.</Tooltip>
     );
 
     return (

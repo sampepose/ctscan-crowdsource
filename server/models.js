@@ -65,12 +65,11 @@ const LabelSchema = new Schema({
         'PHARYNX', 'HEART', 'LUNGS', 'STOMACH', 'SPLEEN', 'KIDNEYS', 'LIVER', 'PELVIS',
       ],
     }],
-    required: true,
   },
   plane: {
     type: String,
     required: true,
-    enum: ['SAGITTAL', 'AXIAL', 'CORONAL'],
+    enum: ['SAGITTAL', 'AXIAL', 'CORONAL', 'GARBAGE'],
   },
   user: {
     type: ObjectId,
