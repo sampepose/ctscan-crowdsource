@@ -53,17 +53,17 @@ class App extends Component {
         case 401:
           localStorage.setItem('loggedIn', null);
           browserHistory.push('/login');
-          throw null;
+          throw new Error();
         case 404:
           this.setState({
             errorStatus: NO_MORE_IMAGES,
           });
-          throw null;
+          throw new Error();
         case 500:
           this.setState({
             errorStatus: SERVER_ERROR,
           });
-          throw null;
+          throw new Error();
       }
     })
     .then(data => {
@@ -129,7 +129,7 @@ class App extends Component {
         case 401:
           localStorage.setItem('loggedIn', null);
           browserHistory.push('/login');
-          throw null;
+          throw new Error();
         case 404:
           this.setState({
             errorStatus: NO_MORE_IMAGES,
@@ -137,12 +137,12 @@ class App extends Component {
             region: null,
             features: [],
           });
-          throw null;
+          throw new Error();
         case 500:
           this.setState({
             errorStatus: SERVER_ERROR,
           });
-          throw null;
+          throw new Error();
       }
     })
     .then(data => {
@@ -190,7 +190,7 @@ class App extends Component {
         </Row>
         <Row>
           <Col xs={6}>
-            <img src={this.state.imageURI} id="mainImg" className="center-block"/>
+            <img src={this.state.imageURI} id="mainImg" className="center-block" alt="scan to label"/>
           </Col>
           <Col xs={6}>
             {
