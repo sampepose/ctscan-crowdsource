@@ -5,9 +5,9 @@ const path = require('path');
 const util = require('util');
 const {Images} = require('../server/models');
 
-const folderName = __dirname + '/../public/images';
+const folderName = __dirname + '/../images';
 if (!folderName || !fs.existsSync(folderName)) {
-  console.error('<ROOT>/public/images does not exist. Please add this dir and try again.');
+  console.error('<ROOT>/images does not exist. Please add this dir and try again.');
   process.exit();
 }
 
