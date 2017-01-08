@@ -190,7 +190,10 @@ class App extends Component {
         </Row>
         <Row>
           <Col xs={6}>
-            <img src={this.state.imageURI} id="mainImg" className="center-block" alt="scan to label"/>
+            {
+              this.state.imageURI &&
+              <img src={this.state.imageURI} id="mainImg" className="center-block" alt="scan to label"/>
+            }
           </Col>
           <Col xs={6}>
             {
