@@ -57,8 +57,6 @@ app.post('/api/login', function(req, res) {
           } else if (!isMatch) {
             res.status(401).send({ error: 'Error authorizing user' });
           } else {
-            console.log('setting session');
-
             req.session.user_id = user._id;
 
             res.status(201).send();
@@ -91,12 +89,7 @@ app.post('/api/signup', function(req, res) {
   });
 });
 
-// Returns the next image to be labeled by the currently logged in session
-app.get('/api/image/next', function(req, res) {
-  if (!req.session.user_id) {
-    return res.status(401).send('Not logged in');
-  }
-
+const fetchNextImageForUser = function(req, res) {
   Images.aggregate([
     // Left-outer join on Images and Labels
     {
@@ -178,22 +171,53 @@ app.get('/api/image/next', function(req, res) {
     }
 
     if (docs.length > 0) {
-      const imageURI = docs[0].uri;
+      const {uri, _id} = docs[0];
       if (!req.session.viewableImages) {
         req.session.viewableImages = [];
       }
-      req.session.viewableImages.push(imageURI);
-      res.status(200).send({uri: imageURI});
+      req.session.viewableImages.push(uri);
+      res.status(200).send({uri, _id});
     } else {
       res.sendStatus(404);
     }
   });
+}
+
+// Returns the next image to be labeled by the currently logged in session
+app.get('/api/image/next', function(req, res) {
+  if (!req.session.user_id) {
+    return res.status(401).send('Not logged in');
+  }
+
+  return fetchNextImageForUser(req, res);
 });
 
 app.post('/api/label/', function(req, res) {
-  if (!req.session.username) {
-    res.status(404).send('Not logged in');
+  if (!req.session.user_id) {
+    res.status(401).send('Not logged in');
   }
+
+  if (!req.body || !req.body.image_id || !req.body.features || !req.body.plane) {
+    res.status(404).send('Invalid payload');
+    return;
+  }
+
+  const labelData = {
+    user: req.session.user_id,
+    image: req.body.image_id,
+    features: req.body.features.map(f => f.toUpperCase()),
+    plane: req.body.plane.toUpperCase(),
+  };
+
+  new Labels(labelData).save((err, label) => {
+    if (err) {
+      console.error(err);
+      res.status(400).send('Error saving label');
+    } else {
+      req.session.viewableImages.splice(req.body.image_id, 1);
+      return fetchNextImageForUser(req, res);
+    }
+  });
 });
 
 // We only need to serve static resources in production. Webpack handles it in dev.

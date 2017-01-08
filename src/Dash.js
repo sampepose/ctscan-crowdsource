@@ -13,7 +13,7 @@ const REGIONS = [ARM, LEG, ABOVE_CLAVICLE, BELOW_CLAVICLE];
 
 // Third decision
 const ABOVE_CLAVICLE_OPTIONS = ['Vertebrae', 'Mandible', 'Brain', 'Cranium', 'Pharynx'];
-const BELOW_CLAVICLE_OPTIONS = ['Heart', 'Lung', 'Vertebrae', 'Stomach', 'Spleen', 'Kidney', 'Liver', 'Pelvis'];
+const BELOW_CLAVICLE_OPTIONS = ['Heart', 'Lungs', 'Vertebrae', 'Stomach', 'Spleen', 'Kidneys', 'Liver', 'Pelvis'];
 
 const SERVER_ERROR = Symbol(), NO_MORE_IMAGES = Symbol();
 
@@ -22,6 +22,7 @@ class App extends Component {
     super(props);
     this.state = {
       imageURI: null,
+      imageID: null,
       errorStatus: null,
       plane: null,
       region: null,
@@ -31,15 +32,20 @@ class App extends Component {
     this.changeRegion = this.changeRegion.bind(this);
     this.changeFeatures = this.changeFeatures.bind(this);
     this.resetErrorStatus = this.resetErrorStatus.bind(this);
+    this.loadNextImage = this.loadNextImage.bind(this);
+    this.submit = this.submit.bind(this);
   }
 
   componentDidMount() {
+    this.loadNextImage();
+  }
+
+  loadNextImage() {
     fetch('/api/image/next', {
       credentials: 'include',
       method: 'GET',
     })
     .then(data => {
-      console.log(data)
       switch (data.status) {
         case 200:
           return data.json();
@@ -62,10 +68,15 @@ class App extends Component {
     .then(data => {
       this.setState({
         imageURI: `images/${data.uri}`,
+        imageID: data._id,
       });
     })
     .catch(err => {
       console.error(err);
+      this.setState({
+        imageURI: null,
+        imageID: null,
+      });
     });
   }
 
@@ -90,7 +101,58 @@ class App extends Component {
     });
   }
 
-  // TODO: Load image from server
+  submit() {
+    fetch('/api/label', {
+      credentials: 'include',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        image_id: this.state.imageID,
+        features: (this.state.region !== ARM && this.state.region !== LEG) ? this.state.features : [this.state.region],
+        plane: this.state.plane,
+      }),
+    })
+    .then(data => {
+      switch (data.status) {
+        case 200:
+          return data.json();
+        case 401:
+          localStorage.setItem('loggedIn', null);
+          browserHistory.push('/login');
+          throw null;
+        case 404:
+          this.setState({
+            errorStatus: NO_MORE_IMAGES,
+          });
+          throw null;
+        case 500:
+          this.setState({
+            errorStatus: SERVER_ERROR,
+          });
+          throw null;
+      }
+    })
+    .then(data => {
+      this.setState({
+        imageURI: `images/${data.uri}`,
+        imageID: data._id,
+        errorStatus: null,
+        plane: null,
+        region: null,
+        features: [],
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      this.setState({
+        imageURI: null,
+        imageID: null,
+      });
+    });
+  }
+
   render() {
     const showSubmit = this.state.region && ((this.state.region === ARM || this.state.region === LEG) || this.state.features.length > 0);
 
@@ -102,7 +164,7 @@ class App extends Component {
             this.state.errorStatus === SERVER_ERROR &&
             <Alert bsStyle="danger" onDismiss={this.resetErrorStatus}>
               <h4>Server Error</h4>
-              <p>Could not load the next image to label. Please refresh the page to try again.</p>
+              <p>Unable to perform action. Please refresh the page and try again.</p>
             </Alert>
           }
           {
@@ -119,8 +181,11 @@ class App extends Component {
             <img src={this.state.imageURI} id="mainImg" className="center-block"/>
           </Col>
           <Col xs={6}>
-            <PlaneSelection onPlaneChange={this.changePlane}/>
-            <RegionSelection onRegionChange={this.changeRegion} active={[this.state.region]}/>
+            <PlaneSelection onPlaneChange={this.changePlane} active={[this.state.plane]}/>
+            {
+              this.state.plane &&
+              <RegionSelection onRegionChange={this.changeRegion} active={[this.state.region]}/>
+            }
             {
               this.state.region &&
               this.state.region !== ARM &&
@@ -137,7 +202,7 @@ class App extends Component {
                 className="center-block"
                 bsSize="large"
                 bsStyle="success"
-                onClick={() => {console.log(this.state)}}>Submit</Button>
+                onClick={this.submit}>Submit</Button>
             }
           </Col>
         </Row>
@@ -152,6 +217,7 @@ class PlaneSelection extends Component {
       <div>
         <h4>Plane</h4>
         <Buttons
+          active={this.props.active}
           buttons={PLANES}
           toggle={true}
           onButtonClick={this.props.onPlaneChange} />
