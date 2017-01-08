@@ -125,6 +125,9 @@ class App extends Component {
         case 404:
           this.setState({
             errorStatus: NO_MORE_IMAGES,
+            plane: null,
+            region: null,
+            features: [],
           });
           throw null;
         case 500:
@@ -181,7 +184,10 @@ class App extends Component {
             <img src={this.state.imageURI} id="mainImg" className="center-block"/>
           </Col>
           <Col xs={6}>
-            <PlaneSelection onPlaneChange={this.changePlane} active={[this.state.plane]}/>
+            {
+              this.state.imageURI &&
+              <PlaneSelection onPlaneChange={this.changePlane} active={[this.state.plane]}/>
+            }
             {
               this.state.plane &&
               <RegionSelection onRegionChange={this.changeRegion} active={[this.state.region]}/>
