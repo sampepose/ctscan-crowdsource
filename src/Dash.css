@@ -11,3 +11,8 @@ img#mainImg {
 #submitBtn {
   margin-top: 15px;
 }
+
+.header {
+  display: inline-block;
+  margin-right: 5px;
+}

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Alert, Button, Col, Grid, Row} from 'react-bootstrap';
+import {Alert, Button, Col, Glyphicon, Grid, OverlayTrigger, Row, Tooltip} from 'react-bootstrap';
 import {browserHistory} from 'react-router'
 
 import './Dash.css';
@@ -219,9 +219,16 @@ class App extends Component {
 
 class PlaneSelection extends Component {
   render() {
-    return ( // TODO: add ? hoverover thingy
+    const tooltip = (
+      <Tooltip id="tooltip">At what plane was this scan taken?</Tooltip>
+    );
+
+    return (
       <div>
-        <h4>Plane</h4>
+        <h4 className="header">Plane </h4>
+        <OverlayTrigger placement="right" overlay={tooltip}>
+          <Glyphicon glyph="question-sign" />
+        </OverlayTrigger>
         <Buttons
           active={this.props.active}
           buttons={PLANES}
@@ -234,9 +241,16 @@ class PlaneSelection extends Component {
 
 class RegionSelection extends Component {
   render() {
-    return ( // TODO: add ? hoverover thingy
+    const tooltip = (
+      <Tooltip id="tooltip">What region of the body is <strong>most</strong> visible?</Tooltip>
+    );
+
+    return (
       <div>
-        <h4>Region</h4>
+        <h4 className="header">Region </h4>
+        <OverlayTrigger placement="right" overlay={tooltip}>
+          <Glyphicon glyph="question-sign" />
+        </OverlayTrigger>
         <Buttons
           active={this.props.active}
           buttons={REGIONS}
@@ -249,9 +263,16 @@ class RegionSelection extends Component {
 
 class FeatureSelection extends Component {
   render() {
+    const tooltip = (
+      <Tooltip id="tooltip">Select <strong>all</strong> visible features in the scan.</Tooltip>
+    );
+
     return (
       <div>
-        <h4>Features</h4>
+        <h4 className="header">Features</h4>
+        <OverlayTrigger placement="right" overlay={tooltip}>
+          <Glyphicon glyph="question-sign" />
+        </OverlayTrigger>
         <Buttons
           active={this.props.active}
           buttons={this.props.features}
