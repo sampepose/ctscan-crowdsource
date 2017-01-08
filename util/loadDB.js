@@ -26,7 +26,7 @@ const images = fs.readdirSync(folderName).map(filename => {
   }
 
   const modify_date = new Date(util.inspect(fs.statSync(`${folderName}/${filename}`).mtime));
-  return {uri: filename, modify_date: modify_date};
+  return {uri: encodeURIComponent(filename), modify_date: modify_date};
 }).filter(f => f);
 
 Images.collection.insert(images, {ordered: false}, (err, result) => {
