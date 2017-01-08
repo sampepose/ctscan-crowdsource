@@ -1,7 +1,11 @@
 var express = require('express');
 var session = require('express-session');
 var bodyParser = require('body-parser')
-var {Users} = require('./models');
+var _ = require('underscore')
+var {Users, Images, Labels} = require('./models');
+const mongoose = require('mongoose');
+
+const {ObjectId} = mongoose.Types;
 
 var app = express();
 app.use(bodyParser.json({}));
@@ -16,6 +20,24 @@ app.use(session({
 if (process.argv[2] === 'prod') {
   app.use(express.static('build'));
 }
+
+// new static middleware
+var staticImageHandler = express.static(__dirname + '/../images')
+
+// catch all sub-directory requests
+app.get('/images/*', function(req, res){
+    // remove subdir from url (static serves from root)
+    req.url = req.url.replace(/^\/images/, '');
+
+    if (req.session.viewableImages.indexOf(req.url.slice(1)) !== -1) {
+      // call the actual middleware, catch pass-through (not found)
+      staticImageHandler(req, res, function() {
+          res.sendStatus(404);
+      });
+    } else {
+      res.sendStatus(403);
+    }
+});
 
 app.post('/api/login', function(req, res) {
   if (!req.body || !req.body.username || !req.body.password) {
@@ -68,10 +90,103 @@ app.post('/api/signup', function(req, res) {
   });
 });
 
-app.get('/api/image/', function(req, res) {
-  if (!req.session.username) {
+// Returns the next image to be labeled by the currently logged in session
+app.get('/api/image/next', function(req, res) {
+  if (!req.session.user_id) {
     res.status(404).send('Not logged in');
   }
+
+  Images.aggregate([
+    // Left-outer join on Images and Labels
+    {
+      $lookup: {
+        from: 'labels',
+        localField: '_id',
+        foreignField: 'image',
+        as: 'labels',
+      },
+    },
+    // Project to transform labels into array of feature arrays, count of labels, and array of user labelers
+    {
+      $project: {
+        uri: 1,
+        features: {
+          $map: {
+            input: '$labels',
+            as: 'label',
+            in: '$$label.features',
+          },
+        },
+        labelCount: {
+          $size: '$labels',
+        },
+        labelers: {
+          $map: {
+            input: '$labels',
+            as: 'label',
+            in: '$$label.user',
+          },
+        },
+      },
+    },
+    // Match to remove documents with >= 3 label count and documents already labeled by user
+    {
+      $match: {
+        labelCount: {
+          $lte: 2,
+        },
+        labelers: {
+          $not: {
+            $in: [new ObjectId(req.session.user_id)]
+          }
+        },
+      },
+    },
+    // Remove documents with 2 labelers and matching label features
+    {
+      $redact: {
+        $cond: {
+          if: {
+            $and: [
+              {
+                $eq: ['$labelCount', 2],
+              },
+              {
+                $eq: [
+                  {
+                    $arrayElemAt: ['$features', 0]
+                  },
+                  {
+                    $arrayElemAt: ['$features', 1]
+                  },
+                ],
+              },
+            ],
+          },
+          then: '$$PRUNE',
+          else: '$$KEEP',
+        }
+      }
+    },
+    {
+      $limit: 1,
+    },
+  ], (err, docs) => {
+    if (err) {
+      return res.status(500).send('Error retrieving image.');
+    }
+
+    if (docs.length > 0) {
+      const imageURI = docs[0].uri;
+      if (!req.session.viewableImages) {
+        req.session.viewableImages = [];
+      }
+      req.session.viewableImages.push(imageURI);
+      res.status(200).send({uri: imageURI});
+    } else {
+      res.sendStatus(404);
+    }
+  });
 });
 
 app.post('/api/label/', function(req, res) {
