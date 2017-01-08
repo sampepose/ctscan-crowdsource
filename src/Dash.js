@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import {Button, Col, Grid, Row} from 'react-bootstrap';
+import {Alert, Button, Col, Grid, Row} from 'react-bootstrap';
+import {browserHistory} from 'react-router'
 
 import './Dash.css';
 
@@ -14,11 +15,14 @@ const REGIONS = [ARM, LEG, ABOVE_CLAVICLE, BELOW_CLAVICLE];
 const ABOVE_CLAVICLE_OPTIONS = ['Vertebrae', 'Mandible', 'Brain', 'Cranium', 'Pharynx'];
 const BELOW_CLAVICLE_OPTIONS = ['Heart', 'Lung', 'Vertebrae', 'Stomach', 'Spleen', 'Kidney', 'Liver', 'Pelvis'];
 
+const SERVER_ERROR = Symbol(), NO_MORE_IMAGES = Symbol();
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       imageURI: null,
+      errorStatus: null,
       plane: null,
       region: null,
       features: [],
@@ -26,6 +30,7 @@ class App extends Component {
     this.changePlane = this.changePlane.bind(this);
     this.changeRegion = this.changeRegion.bind(this);
     this.changeFeatures = this.changeFeatures.bind(this);
+    this.resetErrorStatus = this.resetErrorStatus.bind(this);
   }
 
   componentDidMount() {
@@ -35,10 +40,23 @@ class App extends Component {
     })
     .then(data => {
       console.log(data)
-      if (data.status === 200) {
-        return data.json();
-      } else {
-        // TODO: Handle 404 error
+      switch (data.status) {
+        case 200:
+          return data.json();
+        case 401:
+          localStorage.setItem('loggedIn', null);
+          browserHistory.push('/login');
+          throw null;
+        case 404:
+          this.setState({
+            errorStatus: NO_MORE_IMAGES,
+          });
+          throw null;
+        case 500:
+          this.setState({
+            errorStatus: SERVER_ERROR,
+          });
+          throw null;
       }
     })
     .then(data => {
@@ -66,12 +84,36 @@ class App extends Component {
     this.setState({features});
   }
 
+  resetErrorStatus() {
+    this.setState({
+      errorStatus: null,
+    });
+  }
+
   // TODO: Load image from server
   render() {
     const showSubmit = this.state.region && ((this.state.region === ARM || this.state.region === LEG) || this.state.features.length > 0);
 
     return (
       <Grid>
+        <Row>
+          <Col xs={12}>
+          {
+            this.state.errorStatus === SERVER_ERROR &&
+            <Alert bsStyle="danger" onDismiss={this.resetErrorStatus}>
+              <h4>Server Error</h4>
+              <p>Could not load the next image to label. Please refresh the page to try again.</p>
+            </Alert>
+          }
+          {
+            this.state.errorStatus === NO_MORE_IMAGES &&
+            <Alert bsStyle="info" onDismiss={this.resetErrorStatus}>
+              <h4>No More Images</h4>
+              <p>You have labeled all available images.</p>
+            </Alert>
+          }
+          </Col>
+        </Row>
         <Row>
           <Col xs={6}>
             <img src={this.state.imageURI} id="mainImg" className="center-block"/>
