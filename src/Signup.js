@@ -48,6 +48,7 @@ export default class Signup extends Component {
   handleSubmit(e) {
     e.preventDefault();
     fetch('/api/signup', {
+      credentials: 'include',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
