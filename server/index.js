@@ -167,6 +167,7 @@ const fetchNextImageForUser = function(req, res) {
     },
   ], (err, docs) => {
     if (err) {
+      console.log(err);
       return res.status(500).send('Error retrieving image.');
     }
 
