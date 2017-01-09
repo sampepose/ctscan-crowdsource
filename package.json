@@ -6,7 +6,7 @@
     "react-scripts": "0.8.4"
   },
   "dependencies": {
-    "bcrypt": "^1.0.1",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.15.2",
     "bootstrap": "^3.3.7",
     "es6-promise": "^4.0.5",

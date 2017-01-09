@@ -1,6 +1,7 @@
 'use strict';
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt-nodejs');
+
 const mongoose = require('mongoose');
 
 const {MONGO_URL} = require('./config');
@@ -26,7 +27,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
     set: function(password) {
-      return bcrypt.hashSync(password, NUM_SALT_ROUNDS);
+      return bcrypt.hashSync(password, bcrypt.genSaltSync(NUM_SALT_ROUNDS));
     },
   },
 });
