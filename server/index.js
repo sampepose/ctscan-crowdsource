@@ -206,8 +206,8 @@ app.post('/api/label/', function(req, res) {
   const labelData = {
     user: req.session.user_id,
     image: req.body.image_id,
-    features: req.body.features.map(f => f.toUpperCase()),
-    plane: req.body.plane.toUpperCase(),
+    features: req.body.features,
+    plane: req.body.plane,
   };
 
   new Labels(labelData).save((err, label) => {

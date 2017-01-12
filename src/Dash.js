@@ -1,20 +1,9 @@
 import React, {Component} from 'react';
 import {Alert, Button, Col, Glyphicon, Grid, OverlayTrigger, Row, Tooltip} from 'react-bootstrap';
 import {browserHistory} from 'react-router'
+import {PLANES, REGIONS, FEATURES} from '../config.js';
 
 import './Dash.css';
-
-// First decision
-const GARBAGE = 'Garbage';
-const PLANES = ['Axial', 'Coronal', 'Sagittal', GARBAGE];
-
-// Second decision
-const ARM = 'Arm', LEG = 'Leg', ABOVE_CLAVICLE = 'Above the clavicle', BELOW_CLAVICLE = 'Below the clavicle';
-const REGIONS = [ARM, LEG, ABOVE_CLAVICLE, BELOW_CLAVICLE];
-
-// Third decision
-const ABOVE_CLAVICLE_OPTIONS = ['Vertebrae', 'Mandible', 'Brain', 'Cranium', 'Pharynx'];
-const BELOW_CLAVICLE_OPTIONS = ['Heart', 'Lungs', 'Vertebrae', 'Stomach', 'Spleen', 'Kidneys', 'Liver', 'Pelvis'];
 
 const SERVER_ERROR = Symbol(), NO_MORE_IMAGES = Symbol();
 
@@ -83,7 +72,7 @@ class App extends Component {
 
   changePlane(plane) {
     this.setState({plane: plane[0]});
-    this.changeRegion([null]);
+    this.changeRegion([]);
     this.changeFeatures([]);
   }
 
@@ -103,11 +92,14 @@ class App extends Component {
   }
 
   submit() {
-    let features = [];
-    if (this.state.region !== ARM && this.state.region !== LEG) {
-      features = this.state.features;
-    } else {
+    console.log(this.state);
+    let features;
+    if (this.state.plane.isFeature) {
+      features = [];
+    } else if (this.state.region.isFeature) {
       features = [this.state.region];
+    } else {
+      features = this.state.features;
     }
 
     fetch('/api/label', {
@@ -118,8 +110,8 @@ class App extends Component {
       },
       body: JSON.stringify({
         image_id: this.state.imageID,
-        features,
-        plane: this.state.plane,
+        features: features.map(f => f.label),
+        plane: this.state.plane.label,
       }),
     })
     .then(data => {
@@ -165,8 +157,9 @@ class App extends Component {
   }
 
   render() {
-    const showSubmit = this.state.plane === GARBAGE ||
-      (this.state.region && ((this.state.region === ARM || this.state.region === LEG) || this.state.features.length > 0));
+    const showSubmit = (this.state.plane && this.state.plane.isFeature) ||
+      (this.state.region && this.state.region.isFeature) ||
+      this.state.features.length > 0;
 
     return (
       <Grid>
@@ -201,16 +194,16 @@ class App extends Component {
               <PlaneSelection onPlaneChange={this.changePlane} active={[this.state.plane]}/>
             }
             {
-              this.state.plane && this.state.plane !== GARBAGE &&
+              this.state.plane &&
+              !this.state.plane.isFeature &&
               <RegionSelection onRegionChange={this.changeRegion} active={[this.state.region]}/>
             }
             {
               this.state.region &&
-              this.state.region !== ARM &&
-              this.state.region !== LEG &&
+              !this.state.region.isFeature &&
               <FeatureSelection
                 active={this.state.features}
-                features={this.state.region === ABOVE_CLAVICLE ? ABOVE_CLAVICLE_OPTIONS : BELOW_CLAVICLE_OPTIONS}
+                features={this.state.region.features}
                 onFeatureChange={this.changeFeatures} />
             }
             {
@@ -337,9 +330,9 @@ class Buttons extends Component {
               active={this.state.active.indexOf(b) !== -1}
               bsSize="large"
               bsStyle={this.state.active.indexOf(b) !== -1 ? 'primary' : 'default'}
-              key={b}
+              key={b.label}
               onClick={e => {this.onButtonClick(e, b)}}>
-              {b}
+              {b.label}
             </Button>
           })
         }
@@ -349,8 +342,8 @@ class Buttons extends Component {
 }
 
 Buttons.propTypes = {
-  active: React.PropTypes.arrayOf(React.PropTypes.string), // what is currently active?
-  buttons: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+  active: React.PropTypes.arrayOf(React.PropTypes.object), // what is currently active?
+  buttons: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
   toggle: React.PropTypes.bool,
   vertical: React.PropTypes.bool, // TODO: Implement with CSS
   onButtonClick: React.PropTypes.func,
