@@ -1,10 +1,10 @@
-const addRegionHelpers = (regions, features) => {
-  return Object.keys(regions).map(r => {
+const addRegionHelpers = function(regions, features) {
+  return Object.keys(regions).map(function(r) {
     return {
       label: regions[r].label,
       isFeature: regions[r].isFeature,
-      features: features.filter(f => f.regions.indexOf(regions[r]) !== -1),
-      toString: () => regions[r].label,
+      features: features.filter(function (f) { return f.regions.indexOf(regions[r]) !== -1; }),
+      toString: function() { return regions[r].label; },
     };
   });
 };
@@ -96,6 +96,6 @@ const FEATURES = [
 module.exports = {
   MONGO_URL: 'mongodb://localhost:27017/ctcrowdsource',
   REGIONS: addRegionHelpers(REGIONS, FEATURES),
-  FEATURES,
-  PLANES,
+  FEATURES: FEATURES,
+  PLANES: PLANES,
 };
