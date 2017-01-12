@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt-nodejs');
 
 const mongoose = require('mongoose');
 
-const {MONGO_URL} = require('./config');
+const {LABELS, MONGO_URL} = require('./config');
 const {Schema} = mongoose;
 const {ObjectId} = mongoose.Schema.Types;
 const NUM_SALT_ROUNDS = 10; // really means 2^10 rounds
@@ -61,10 +61,7 @@ const LabelSchema = new Schema({
   features: {
     type: [{
       type: String,
-      enum: [
-        'ARM', 'LEG', 'VERTEBRAE', 'MANDIBLE', 'BRAIN', 'CRANIUM',
-        'PHARYNX', 'HEART', 'LUNGS', 'STOMACH', 'SPLEEN', 'KIDNEYS', 'LIVER', 'PELVIS',
-      ],
+      enum: LABELS,
     }],
   },
   plane: {
