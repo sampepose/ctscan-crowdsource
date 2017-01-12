@@ -5,6 +5,10 @@ import {PLANES, REGIONS, FEATURES} from '../config.js';
 
 import './Dash.css';
 
+import axial from './img/axial.jpg';
+import coronal from './img/coronal.jpg';
+import sagittal from './img/sagittal.jpg';
+
 const SERVER_ERROR = Symbol(), NO_MORE_IMAGES = Symbol();
 
 class App extends Component {
@@ -225,13 +229,29 @@ class App extends Component {
 class PlaneSelection extends Component {
   render() {
     const tooltip = (
-      <Tooltip id="tooltip">At what plane was this scan taken? Select 'Garbage' if poor scan or nothing of interest visible.</Tooltip>
+      <Tooltip id="tooltip">
+        <div style={{minWidth: 600}}>
+          <figure className="planeHelper">
+            <img src={axial} alt="axial" height={200} />
+            <figcaption>Axial</figcaption>
+          </figure>
+          <figure className="planeHelper">
+            <img src={coronal} alt="coronal" height={200} />
+            <figcaption>Coronal</figcaption>
+          </figure>
+          <figure className="planeHelper">
+            <img src={sagittal} alt="sagittal" height={200} />
+            <figcaption>Sagittal</figcaption>
+          </figure>
+        </div>
+        Select 'Garbage' if poor scan or nothing of interest visible.
+      </Tooltip>
     );
 
     return (
       <div>
         <h4 className="header">Plane </h4>
-        <OverlayTrigger placement="right" overlay={tooltip}>
+        <OverlayTrigger placement="bottom" overlay={tooltip} style={{minWidth: 600}}o>
           <Glyphicon glyph="question-sign" />
         </OverlayTrigger>
         <Buttons

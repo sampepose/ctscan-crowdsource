@@ -16,3 +16,11 @@ img#mainImg {
   display: inline-block;
   margin-right: 5px;
 }
+
+figure.planeHelper {
+  display: inline-block;
+}
+
+.tooltip-inner {
+  max-width: none !important;
+}
