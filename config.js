@@ -26,13 +26,9 @@ const PLANES = [
 ];
 
 const REGIONS = {
-  ARM: {
+  EXTREMITY: {
     isFeature: true,
-    label: 'Arm',
-  },
-  LEG: {
-    isFeature: true,
-    label: 'Leg',
+    label: 'Extremity',
   },
   ABOVE_CLAVICLE: {
     label: 'Above the clavicle',
@@ -89,6 +85,10 @@ const FEATURES = [
   },
   {
     label: 'Pelvis',
+    regions: [REGIONS.BELOW_CLAVICLE],
+  },
+  {
+    label: 'Bladder',
     regions: [REGIONS.BELOW_CLAVICLE],
   },
 ];
